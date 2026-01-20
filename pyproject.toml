@@ -1,0 +1,14 @@
+[project]
+name = "purrfectdata"
+version = "0.1.0"
+description = "A purrfect data quality tool"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "polars>=1.37.1",
+    "rich>=14.2.0",
+    "typer>=0.21.1",
+]
+
+[project.scripts]
+purf = "purrfect.cli:app"
