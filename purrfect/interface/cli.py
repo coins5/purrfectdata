@@ -8,6 +8,7 @@ from typing import Optional
 from purrfect.infrastructure.polars_loader import PolarsDataLoader
 from purrfect.infrastructure.yaml_parser import YamlParser
 from purrfect.infrastructure.profiler import PolarsProfiler
+from purrfect.domain.scoring import ScoreCalculator
 from purrfect.application.sniffer import DataSniffer
 from purrfect.domain.entities import Hairball
 
@@ -36,6 +37,7 @@ def sniff(
     loader = PolarsDataLoader()
     parser = YamlParser()
     profiler = PolarsProfiler()
+    scorer = ScoreCalculator()
     sniffer = DataSniffer()
 
     # 2. Execution
@@ -60,17 +62,32 @@ def sniff(
         with console.status("[bold green]Sniffing for hairballs...[/bold green]", spinner="dots"):
             hairballs = sniffer.sniff(data, rules)
 
+        # Calculate Score
+        quality_score = scorer.calculate(profile, hairballs)
+
     except Exception as e:
         console.print(f"\n[bold red]😿 Error:[/bold red] {e}")
         raise typer.Exit(code=1)
 
     # 3. Present Results
+    
+    # Display Score
+    console.print(f"\n[bold]Quality Score:[/bold] {quality_score.value}/100")
+    if quality_score.grade == 'A':
+        grade_color = "green"
+    elif quality_score.grade == 'B':
+        grade_color = "yellow"
+    else:
+        grade_color = "red"
+        
+    console.print(f"[bold]Grade:[/bold] [{grade_color}]{quality_score.grade}[/{grade_color}]")
+
     if output:
         try:
              # Lazy import or just imported at top
             from purrfect.infrastructure.html_reporter import HTMLReporter
             reporter = HTMLReporter()
-            reporter.generate_report(hairballs, profile, output)
+            reporter.generate_report(hairballs, profile, quality_score, output)
             console.print(f"\n[bold blue]📄 HTML report generated at {output}[/bold blue]")
         except Exception as e:
              console.print(f"[bold red]⚠️ Failed to generate HTML report:[/bold red] {e}")
