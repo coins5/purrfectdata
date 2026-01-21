@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purrfect Data Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        catorange: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        },
+                        catblack: '#1f2937',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 text-catblack font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-10">
+            <h1 class="text-5xl font-bold text-catorange-600 mb-2">🐾 Purrfect Data Report 🐾</h1>
+            <p class="text-xl text-gray-600">Checking your data for hairballs...</p>
+        </header>
+
+        <!-- Dataset Stats -->
+        <div class="stats shadow w-full mb-8 bg-white">
+            <div class="stat place-items-center">
+                <div class="stat-title">Rows</div>
+                <div class="stat-value text-catorange-600">{{ profile.row_count }}</div>
+                <div class="stat-desc">Total records</div>
+            </div>
+            
+            <div class="stat place-items-center">
+                <div class="stat-title">Columns</div>
+                <div class="stat-value text-gray-700">{{ profile.column_count }}</div>
+                <div class="stat-desc">{{ profile.columns|length }} fields</div>
+            </div>
+            
+            <div class="stat place-items-center">
+                <div class="stat-title">Missing Cells</div>
+                <div class="stat-value text-red-500">{{ profile.missing_cells }}</div>
+                <div class="stat-desc">Empty values</div>
+            </div>
+
+            <div class="stat place-items-center">
+                <div class="stat-title">Duplicate Rows</div>
+                <div class="stat-value text-orange-500">{{ profile.duplicate_rows }}</div>
+                 <div class="stat-desc">Identical records</div>
+            </div>
+             <div class="stat place-items-center">
+                <div class="stat-title">Memory Usage</div>
+                <div class="stat-value text-blue-500">{{ "%.2f"|format(profile.memory_usage_mb) }} MB</div>
+                 <div class="stat-desc">Estimated</div>
+            </div>
+        </div>
+
+        <!-- Score Card -->
+        <div class="card bg-white shadow-xl mb-8">
+            <div class="card-body items-center text-center">
+                <h2 class="card-title text-2xl mb-4">Quality Score</h2>
+                <div class="radial-progress 
+                    {% if score.grade == 'A' %}text-green-500
+                    {% elif score.grade == 'B' %}text-yellow-500
+                    {% else %}text-red-500{% endif %}" 
+                    style="--value:{{ score.value }}; --size:12rem; --thickness: 1rem;" 
+                    role="progressbar">
+                    <span class="text-4xl font-bold">{{ score.value|int }}</span>
+                </div>
+                <div class="mt-4">
+                    <span class="text-xl font-bold">Grade: </span>
+                    <span class="text-2xl font-black 
+                        {% if score.grade == 'A' %}text-green-600
+                        {% elif score.grade == 'B' %}text-yellow-600
+                        {% else %}text-red-600{% endif %}">
+                        {{ score.grade }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {% if hairballs %}
+            <div class="bg-white rounded-lg shadow-xl overflow-hidden border-t-8 border-red-500">
+                <div class="p-6 bg-red-50 border-b border-red-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-red-800">Hairballs Detected! 🙀</h2>
+                            <p class="text-red-700 mt-1">Found {{ hairballs|length }} issues across your dataset.</p>
+                        </div>
+                        <div class="bg-red-200 text-red-800 rounded-full w-16 h-16 flex items-center justify-center text-3xl font-bold">
+                            {{ hairballs|length }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-800 text-white">
+                                <th class="p-4 font-semibold uppercase tracking-wider text-sm">Row Index</th>
+                                <th class="p-4 font-semibold uppercase tracking-wider text-sm">Column</th>
+                                <th class="p-4 font-semibold uppercase tracking-wider text-sm">Rule Type</th>
+                                <th class="p-4 font-semibold uppercase tracking-wider text-sm">Message</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for hairball in hairballs %}
+                            <tr class="hover:bg-orange-50 transition-colors">
+                                <td class="p-4 font-mono text-sm text-gray-700">{{ hairball.row_index }}</td>
+                                <td class="p-4 font-medium text-gray-900">{{ hairball.column }}</td>
+                                <td class="p-4 text-sm text-gray-600">
+                                    <span class="bg-gray-200 px-2 py-1 rounded text-xs font-bold text-gray-700 uppercase">
+                                        {{ hairball.rule_type.name if hairball.rule_type else 'N/A' }}
+                                    </span>
+                                </td>
+                                <td class="p-4 text-red-600 font-medium">{{ hairball.message }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden border-t-8 border-green-500">
+                <div class="p-8 text-center">
+                    <div class="mb-6 inline-flex items-center justify-center w-24 h-24 rounded-full bg-green-100 text-green-600 mb-4">
+                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h2 class="text-3xl font-bold text-green-800 mb-4">Purrfect! 😺</h2>
+                    <p class="text-lg text-gray-600">No hairballs found. Your data is clean and ready to go!</p>
+                </div>
+            </div>
+        {% endif %}
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p>Generated by PurrfectData &bull; <span class="text-catorange-500">Stay pawsitive!</span></p>
+        </footer>
+    </div>
+</body>
+</html>

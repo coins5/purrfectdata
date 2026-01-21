@@ -1,0 +1,20 @@
+rules:
+- column: id
+  type: NOT_NULL
+- column: id
+  type: POSITIVE
+- column: product_name
+  type: NOT_NULL
+- column: product_name
+  type: ACCEPTED_VALUES
+  values:
+  - Scratcher
+  - Laser Pointer
+  - Mouse Toy
+  - Catnip
+  - Wool Ball
+  - Tuna Can
+- column: price
+  type: NOT_NULL
+- column: price
+  type: POSITIVE

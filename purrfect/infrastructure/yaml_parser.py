@@ -37,10 +37,43 @@ class YamlParser:
 
             try:
                 rule_type = RuleType[r_type_str.upper()]
-                rules.append(Rule(column_name=col, rule_type=rule_type))
+                
+                # Collect valid params (anything except column and type)
+                params = {k: v for k, v in r.items() if k not in ["column", "type"]}
+                
+                rules.append(Rule(column_name=col, rule_type=rule_type, params=params))
             except KeyError:
                 # Unknown rule type, skip or log?
                 # For now, skip to keep simple.
                 continue
         
         return rules
+
+    def dump(self, rules: List[Rule], file_path: str) -> None:
+        """
+        Serializes a list of Rule entities to a YAML file.
+        """
+        data = {"rules": []}
+        for rule in rules:
+            rule_dict = {
+                "column": rule.column_name,
+                "type": rule.rule_type.name.upper() # Ensure UPPERCASE for consistency
+            }
+            # Add params if any exists
+            if rule.params:
+                # accepted_values specific handling? or just dump all params?
+                # The entities.py shows Rule has params: Dict[str, Any]
+                # For ACCEPTED_VALUES, we want "values" key in the yaml rule object, 
+                # but currently Rule puts them in 'params'. 
+                # We should flatten params into the rule_dict for the YAML format to be clean.
+                # Example YAML: 
+                #   - column: "status"
+                #     type: "ACCEPTED_VALUES"
+                #     values: ["active", "inactive"]
+                for k, v in rule.params.items():
+                    rule_dict[k] = v
+            
+            data["rules"].append(rule_dict)
+
+        with open(file_path, 'w') as f:
+            yaml.dump(data, f, sort_keys=False)

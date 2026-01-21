@@ -5,6 +5,19 @@ from typing import Dict, Any, Optional
 class RuleType(Enum):
     NOT_NULL = auto()
     POSITIVE = auto()
+    ACCEPTED_VALUES = auto()
+    SEMANTIC = auto()
+
+@dataclass
+class ColumnStats:
+    name: str
+    dtype: str
+    min_value: Optional[float]
+    max_value: Optional[float]
+    null_count: int
+    n_unique: int
+    count: int
+    unique_values: Optional[list] = None
 
 @dataclass
 class Rule:
@@ -18,3 +31,12 @@ class Hairball:
     column: str
     message: str
     rule_type: Optional[RuleType] = None
+
+@dataclass
+class DatasetProfile:
+    row_count: int
+    column_count: int
+    columns: list[str]
+    missing_cells: int
+    duplicate_rows: int
+    memory_usage_mb: float

@@ -1,0 +1,4 @@
+rules:
+  - column: "feedback"
+    type: "SEMANTIC"
+    criteria: "The text must be positive sentiment. If it is negative, say NO."
