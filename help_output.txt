@@ -1,0 +1,15 @@
+                                                                                                                                                                 
+ Usage: python -m purrfect.interface.cli [OPTIONS] FILE_PATH                                                                                                     
+                                                                                                                                                                 
+ 👃 Sniffs a file looking for hairballs (data errors) based on the provided rules.                                                                               
+                                                                                                                                                                 
+╭─ Arguments ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *    file_path      TEXT  Path to the dataset file (CSV, JSON) [required]                                                                                     │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --rules               -r      TEXT  Path to the rules.yaml file [required]                                                                                 │
+│    --install-completion                Install completion for the current shell.                                                                              │
+│    --show-completion                   Show completion for the current shell, to copy it or customize the installation.                                       │
+│    --help                              Show this message and exit.                                                                                            │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
