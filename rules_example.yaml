@@ -1,0 +1,5 @@
+rules:
+  - column: "price"
+    type: "POSITIVE"
+  - column: "product_name"
+    type: "NOT_NULL"
