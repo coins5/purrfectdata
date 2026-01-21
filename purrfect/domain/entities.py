@@ -18,3 +18,12 @@ class Hairball:
     column: str
     message: str
     rule_type: Optional[RuleType] = None
+
+@dataclass
+class DatasetProfile:
+    row_count: int
+    column_count: int
+    columns: list[str]
+    missing_cells: int
+    duplicate_rows: int
+    memory_usage_mb: float

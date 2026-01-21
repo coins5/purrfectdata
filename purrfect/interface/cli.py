@@ -7,6 +7,7 @@ from typing import Optional
 # Internal Imports (Clean Architecture Wiring)
 from purrfect.infrastructure.polars_loader import PolarsDataLoader
 from purrfect.infrastructure.yaml_parser import YamlParser
+from purrfect.infrastructure.profiler import PolarsProfiler
 from purrfect.application.sniffer import DataSniffer
 from purrfect.domain.entities import Hairball
 
@@ -24,6 +25,7 @@ def callback():
 def sniff(
     file_path: str = typer.Argument(..., help="Path to the dataset file (CSV, JSON)"),
     rules_path: str = typer.Option(..., "--rules", "-r", help="Path to the rules.yaml file"),
+    output: Optional[str] = typer.Option(None, "--output", "-o", help="Path to save HTML report"),
 ):
     """
     👃 Sniffs a file looking for hairballs (data errors) based on the provided rules.
@@ -33,6 +35,7 @@ def sniff(
     # 1. Dependency Injection (Manual)
     loader = PolarsDataLoader()
     parser = YamlParser()
+    profiler = PolarsProfiler()
     sniffer = DataSniffer()
 
     # 2. Execution
@@ -49,6 +52,10 @@ def sniff(
         
         console.print(f"[green]✓ loaded data with {data.height} rows[/green]")
 
+        # Profile Data
+        with console.status("[bold green]Profiling data...[/bold green]", spinner="dots"):
+            profile = profiler.profile(data)
+
         # Sniff
         with console.status("[bold green]Sniffing for hairballs...[/bold green]", spinner="dots"):
             hairballs = sniffer.sniff(data, rules)
@@ -58,6 +65,16 @@ def sniff(
         raise typer.Exit(code=1)
 
     # 3. Present Results
+    if output:
+        try:
+             # Lazy import or just imported at top
+            from purrfect.infrastructure.html_reporter import HTMLReporter
+            reporter = HTMLReporter()
+            reporter.generate_report(hairballs, profile, output)
+            console.print(f"\n[bold blue]📄 HTML report generated at {output}[/bold blue]")
+        except Exception as e:
+             console.print(f"[bold red]⚠️ Failed to generate HTML report:[/bold red] {e}")
+
     if not hairballs:
          console.print("\n[bold green]😺 Purrfect! No hairballs found. The data is clean.[/bold green]")
          return
