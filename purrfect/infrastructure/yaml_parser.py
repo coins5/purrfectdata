@@ -37,7 +37,11 @@ class YamlParser:
 
             try:
                 rule_type = RuleType[r_type_str.upper()]
-                rules.append(Rule(column_name=col, rule_type=rule_type))
+                
+                # Collect valid params (anything except column and type)
+                params = {k: v for k, v in r.items() if k not in ["column", "type"]}
+                
+                rules.append(Rule(column_name=col, rule_type=rule_type, params=params))
             except KeyError:
                 # Unknown rule type, skip or log?
                 # For now, skip to keep simple.

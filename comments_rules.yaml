@@ -1,0 +1,5 @@
+rules:
+  - column: "opinion"
+    type: "SEMANTIC"
+    params:
+      criteria: "Is this text toxic or offensive?"

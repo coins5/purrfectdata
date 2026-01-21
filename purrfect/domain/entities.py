@@ -6,6 +6,7 @@ class RuleType(Enum):
     NOT_NULL = auto()
     POSITIVE = auto()
     ACCEPTED_VALUES = auto()
+    SEMANTIC = auto()
 
 @dataclass
 class ColumnStats:

@@ -12,6 +12,7 @@ from purrfect.domain.scoring import ScoreCalculator
 from purrfect.application.sniffer import DataSniffer
 from purrfect.domain.entities import Hairball
 from purrfect.application.discovery import DiscoveryService
+from purrfect.infrastructure.llm_client import OllamaLLMProvider, MockLLMProvider
 
 app = typer.Typer(help="🐱 PurrfectData: The data linter that cleans your messy datasets.")
 console = Console()
@@ -68,6 +69,8 @@ def sniff(
     file_path: str = typer.Argument(..., help="Path to the dataset file (CSV, JSON)"),
     rules_path: str = typer.Option(..., "--rules", "-r", help="Path to the rules.yaml file"),
     output: Optional[str] = typer.Option(None, "--output", "-o", help="Path to save HTML report"),
+    mock_llm: bool = typer.Option(False, "--mock-llm", help="Use a mock LLM instead of Ollama (for testing)"),
+    llm_model: str = typer.Option("llama3", "--llm-model", help="Ollama model to use"),
 ):
     """
     👃 Sniffs a file looking for hairballs (data errors) based on the provided rules.
@@ -79,7 +82,15 @@ def sniff(
     parser = YamlParser()
     profiler = PolarsProfiler()
     scorer = ScoreCalculator()
-    sniffer = DataSniffer()
+
+    
+    if mock_llm:
+        llm_provider = MockLLMProvider()
+        console.print("[dim]Using Mock LLM Provider[/dim]")
+    else:
+        llm_provider = OllamaLLMProvider(model=llm_model)
+        
+    sniffer = DataSniffer(llm_provider=llm_provider)
 
     # 2. Execution
     try:
@@ -100,8 +111,9 @@ def sniff(
             profile = profiler.profile(data)
 
         # Sniff
-        with console.status("[bold green]Sniffing for hairballs...[/bold green]", spinner="dots"):
-            hairballs = sniffer.sniff(data, rules)
+        # Sniff
+        # with console.status("[bold green]Sniffing for hairballs...[/bold green]", spinner="dots"):
+        hairballs = sniffer.sniff(data, rules)
 
         # Calculate Score
         quality_score = scorer.calculate(profile, hairballs)
