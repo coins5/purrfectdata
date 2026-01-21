@@ -5,6 +5,18 @@ from typing import Dict, Any, Optional
 class RuleType(Enum):
     NOT_NULL = auto()
     POSITIVE = auto()
+    ACCEPTED_VALUES = auto()
+
+@dataclass
+class ColumnStats:
+    name: str
+    dtype: str
+    min_value: Optional[float]
+    max_value: Optional[float]
+    null_count: int
+    n_unique: int
+    count: int
+    unique_values: Optional[list] = None
 
 @dataclass
 class Rule:

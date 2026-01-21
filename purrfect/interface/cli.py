@@ -11,6 +11,7 @@ from purrfect.infrastructure.profiler import PolarsProfiler
 from purrfect.domain.scoring import ScoreCalculator
 from purrfect.application.sniffer import DataSniffer
 from purrfect.domain.entities import Hairball
+from purrfect.application.discovery import DiscoveryService
 
 app = typer.Typer(help="🐱 PurrfectData: The data linter that cleans your messy datasets.")
 console = Console()
@@ -20,6 +21,46 @@ def callback():
     """
     Data Quality Tool for Messy Datasets.
     """
+
+
+@app.command()
+def suggest(
+    file_path: str = typer.Argument(..., help="Path to the dataset file (CSV, JSON)"),
+    output: str = typer.Option("suggested_rules.yaml", "--output", "-o", help="Path to save suggested rules")
+):
+    """
+    🔮 Infers rules from your data and suggests a configuration.
+    """
+    console.print(Panel("🐱 [bold magenta]PurrfectData[/bold magenta] is smelling your data...", border_style="magenta"))
+
+    try:
+        service = DiscoveryService()
+        
+        with console.status("[bold green]Analyzing patterns...[/bold green]", spinner="dots"):
+             rules = service.run(file_path, output)
+
+        console.print(f"\n[bold green]😺 Done! I found {len(rules)} potential rules.[/bold green]")
+        
+        # Preview
+        table = Table(title="Suggested Rules", border_style="magenta")
+        table.add_column("Column", style="cyan")
+        table.add_column("Rule Type", style="yellow")
+        table.add_column("Params", style="dim")
+
+        for r in rules:
+            table.add_row(
+                r.column_name,
+                r.rule_type.name,
+                str(r.params) if r.params else ""
+            )
+        
+        console.print(table)
+        console.print(f"\n[bold blue]💾 Saved suggestions to {output}[/bold blue]")
+        console.print(f"Run [bold white]purf sniff {file_path} --rules {output}[/bold white] to test them!")
+
+    except Exception as e:
+        console.print(f"\n[bold red]😿 Error:[/bold red] {e}")
+        raise typer.Exit(code=1)
 
 
 @app.command()
